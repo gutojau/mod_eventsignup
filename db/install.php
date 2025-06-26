@@ -1,38 +1,34 @@
 <?php
 /**
- * Installation script for the eventsignup module.
- * Populates the question type table.
+ * Script de instalação para o módulo eventsignup.
  *
  * @package   mod_eventsignup
- * @copyright 2024 Your Name
+ * @copyright 2024 Seu Nome
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Executed upon installation of the plugin.
- *
- * @return bool
- */
-function xmldb_mod_eventsignup_install() {
+function xmldb_eventsignup_install() {
     global $DB;
 
-    // Define the question types that this plugin supports.
     $question_types = [
-        ['type' => 'text', 'has_choices' => 'n', 'response_table' => 'eventsignup_response_text'],
-        ['type' => 'textarea', 'has_choices' => 'n', 'response_table' => 'eventsignup_response_text'],
-        ['type' => 'file', 'has_choices' => 'n', 'response_table' => 'eventsignup_response_file'],
-        // Add other types like 'radio', 'checkbox', 'select' here in the future.
+        ['type' => 'yesno',      'has_choices' => 'y', 'response_table' => 'eventsignup_response_choice'],
+        ['type' => 'text',       'has_choices' => 'n', 'response_table' => 'eventsignup_response_text'],
+        ['type' => 'textarea',   'has_choices' => 'n', 'response_table' => 'eventsignup_response_text'],
+        ['type' => 'numeric',    'has_choices' => 'n', 'response_table' => 'eventsignup_response_numeric'],
+        ['type' => 'date',       'has_choices' => 'n', 'response_table' => 'eventsignup_response_date'],
+        ['type' => 'radio',      'has_choices' => 'y', 'response_table' => 'eventsignup_response_choice'],
+        ['type' => 'checkbox',   'has_choices' => 'y', 'response_table' => 'eventsignup_response_choice'],
+        ['type' => 'dropdown',   'has_choices' => 'y', 'response_table' => 'eventsignup_response_choice'],
+        ['type' => 'rate',       'has_choices' => 'y', 'response_table' => 'eventsignup_response_choice'],
+        ['type' => 'file',       'has_choices' => 'n', 'response_table' => 'eventsignup_response_file'],
+        ['type' => 'pagebreak',  'has_choices' => 'n', 'response_table' => null],
     ];
 
     foreach ($question_types as $qt) {
         if (!$DB->record_exists('eventsignup_question_type', ['type' => $qt['type']])) {
-            $record = new stdClass();
-            $record->type = $qt['type'];
-            $record->has_choices = $qt['has_choices'];
-            $record->response_table = $qt['response_table'];
-            $DB->insert_record('eventsignup_question_type', $record);
+            $DB->insert_record('eventsignup_question_type', (object)$qt);
         }
     }
 

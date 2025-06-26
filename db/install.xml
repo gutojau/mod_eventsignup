@@ -1,29 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/eventsignup/db" VERSION="20240618" COMMENT="XMLDB file for Moodle mod_eventsignup"
+<XMLDB PATH="mod/eventsignup/db" VERSION="20240625" COMMENT="XMLDB file for Moodle mod_eventsignup"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="eventsignup" COMMENT="Defines the main eventsignup instances">
+    <TABLE NAME="eventsignup" COMMENT="Define as instâncias principais do eventsignup">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Course eventsignup activity belongs to"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Name of the event"/>
-        <FIELD NAME="intro" TYPE="text" NOTNULL="true" COMMENT="Introduction text for the event signup form"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" COMMENT="Format of intro field"/>
-        <FIELD NAME="qtype" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Legacy field from questionnaire, can be repurposed or removed."/>
-        <FIELD NAME="respondenttype" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="fullname"/>
-        <FIELD NAME="respondents" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="FK to user table, used for manager/teacher roles"/>
-        <FIELD NAME="sid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Survey ID - for templating, can be repurposed."/>
-        <FIELD NAME="theme" TYPE="char" LENGTH="100" NOTNULL="false"/>
-        <FIELD NAME="notifications" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="opendate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="closedate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="resume" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="navigate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="autonum" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" COMMENT="Auto-numbering for questions/pages"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="The maximum grade for this activity. (Can be used for completion)"/>
+        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Campo legado, pode ser usado para conclusão"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -31,20 +22,17 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="eventsignup_question" COMMENT="Defines the questions in each eventsignup">
+    <TABLE NAME="eventsignup_question" COMMENT="Define as perguntas em cada eventsignup">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="survey_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="FK to eventsignup table"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="30" NOTNULL="false"/>
-        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="FK to eventsignup_question_type table"/>
-        <FIELD NAME="result_id" TYPE="int" LENGTH="10" NOTNULL="false"/>
-        <FIELD NAME="length" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="precise" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="content" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="survey_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="FK para a tabela eventsignup"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="30" NOTNULL="false" COMMENT="Nome curto/ID da pergunta (legado)"/>
+        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="FK para a tabela eventsignup_question_type"/>
+        <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Ordem da pergunta no formulário"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="true" COMMENT="O texto da pergunta"/>
         <FIELD NAME="required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="deleted" TYPE="char" LENGTH="1" NOTNULL="true" DEFAULT="n"/>
-        <FIELD NAME="extradata" TYPE="text" NOTNULL="false" COMMENT="Stores extra settings for question types, e.g., file upload settings."/>
+        <FIELD NAME="extradata" TYPE="text" NOTNULL="false" COMMENT="Guarda definições extra para tipos de pergunta"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -52,25 +40,25 @@
       </KEYS>
     </TABLE>
     
-    <TABLE NAME="eventsignup_question_type" COMMENT="The types of questions available">
+    <TABLE NAME="eventsignup_question_type" COMMENT="Os tipos de pergunta disponíveis">
         <FIELDS>
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-            <FIELD NAME="typeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
             <FIELD NAME="type" TYPE="char" LENGTH="32" NOTNULL="true"/>
             <FIELD NAME="has_choices" TYPE="char" LENGTH="1" NOTNULL="true" DEFAULT="n"/>
             <FIELD NAME="response_table" TYPE="char" LENGTH="32" NOTNULL="false"/>
         </FIELDS>
         <KEYS>
             <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            <KEY NAME="type_uk" TYPE="unique" FIELDS="type"/>
         </KEYS>
     </TABLE>
 
-    <TABLE NAME="eventsignup_quest_choice" COMMENT="Choices for questions that have them">
+    <TABLE NAME="eventsignup_question_choice" COMMENT="Opções para perguntas que as têm (rádio, caixa de seleção, etc.)">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="content" TYPE="text" NOTNULL="true"/>
-        <FIELD NAME="value" TYPE="char" LENGTH="32" NOTNULL="false"/>
+        <FIELD NAME="value" TYPE="char" LENGTH="255" NOTNULL="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -78,14 +66,13 @@
       </KEYS>
     </TABLE>
 
-    <!-- NEW TABLE FOR REGISTRANTS -->
-    <TABLE NAME="eventsignup_registrants" COMMENT="Stores information about each external registrant for an event.">
+    <TABLE NAME="eventsignup_registrants" COMMENT="Guarda informação sobre cada inscrito externo">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="eventsignup_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to the eventsignup table instance."/>
-        <FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="true"/>
-        <FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="true"/>
-        <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="true" COMMENT="Unique identifier for the registrant for a given event."/>
+        <FIELD NAME="eventsignup_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="cpf" TYPE="char" LENGTH="11" NOTNULL="true"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="true"/>
         <FIELD NAME="phone" TYPE="char" LENGTH="20" NOTNULL="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
@@ -95,20 +82,17 @@
         <KEY NAME="eventsignup_fk" TYPE="foreign" FIELDS="eventsignup_id" REFTABLE="eventsignup" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="eventsignup_email_uk" UNIQUE="true" FIELDS="eventsignup_id, email"/>
+        <INDEX NAME="eventsignup_cpf_uk" UNIQUE="true" FIELDS="eventsignup_id, cpf"/>
+        <INDEX NAME="eventsignup_email_idx" UNIQUE="false" FIELDS="eventsignup_id, email"/>
       </INDEXES>
     </TABLE>
 
-    <!-- MODIFIED/NEW RESPONSE TABLES -->
-    <TABLE NAME="eventsignup_response" COMMENT="Stores the main response entry for a given registrant.">
+    <TABLE NAME="eventsignup_response" COMMENT="Entrada de resposta principal para um dado inscrito">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="eventsignup_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <!-- userid field is REPLACED with registrant_id -->
-        <FIELD NAME="registrant_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to the eventsignup_registrants table."/>
+        <FIELD NAME="registrant_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="submitted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="complete" TYPE="char" LENGTH="1" NOTNULL="true" DEFAULT="n"/>
-        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -117,7 +101,7 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="eventsignup_response_text" COMMENT="Stores text-based responses.">
+    <TABLE NAME="eventsignup_response_text" COMMENT="Guarda respostas baseadas em texto">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
@@ -129,32 +113,56 @@
         <KEY NAME="response_text_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-
-    <TABLE NAME="eventsignup_response_other" COMMENT="Stores 'other' choice responses for multiple choice questions.">
+    
+    <TABLE NAME="eventsignup_response_choice" COMMENT="Guarda as respostas de escolha múltipla/única">
         <FIELDS>
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-            <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-            <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-            <FIELD NAME="choice_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-            <FIELD NAME="response" TYPE="text" NOTNULL="true"/>
+            <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="choice_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
         </FIELDS>
         <KEYS>
             <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-            <KEY NAME="response_other_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
+            <KEY NAME="response_choice_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
         </KEYS>
     </TABLE>
-      
-    <!-- NEW TABLE FOR FILE UPLOADS -->
-    <TABLE NAME="eventsignup_response_file" COMMENT="Links responses to uploaded files in the Moodle file area.">
+    
+    <TABLE NAME="eventsignup_response_date" COMMENT="Guarda as respostas de data">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="response" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            <KEY NAME="response_date_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
+        </KEYS>
+    </TABLE>
+    
+    <TABLE NAME="eventsignup_response_numeric" COMMENT="Guarda as respostas numéricas">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <!-- CORREÇÃO: LENGTH="10,5" foi alterado para LENGTH="10" DECIMALS="5" -->
+            <FIELD NAME="response" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            <KEY NAME="response_numeric_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
+        </KEYS>
+    </TABLE>
+
+    <TABLE NAME="eventsignup_response_file" COMMENT="Liga as respostas aos ficheiros enviados na área de ficheiros do Moodle">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to eventsignup_response table."/>
-        <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to eventsignup_question table."/>
+        <FIELD NAME="response_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="question_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="response_file_fk" TYPE="foreign" FIELDS="response_id" REFTABLE="eventsignup_response" REFFIELDS="id"/>
-        <KEY NAME="question_file_fk" TYPE="foreign" FIELDS="question_id" REFTABLE="eventsignup_question" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
 

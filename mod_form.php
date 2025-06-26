@@ -1,9 +1,9 @@
 <?php
 /**
- * The main form for setting up the eventsignup module instances.
+ * O formulário principal para configurar as instâncias do módulo eventsignup.
  *
  * @package   mod_eventsignup
- * @copyright 2024 Your Name
+ * @copyright 2024 Seu Nome
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -14,45 +14,27 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 class mod_eventsignup_mod_form extends moodleform_mod {
 
     /**
-     * Defines the form structure.
+     * Define a estrutura do formulário.
      */
     protected function definition() {
         $mform = $this->_form;
 
-        //-------------------------------------------------------------------------------
-        // General settings
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Event name
         $mform->addElement('text', 'name', get_string('name'), ['size' => '64']);
-        if (!empty($CFG->formatstringstriptags)) {
-            $mform->setType('name', PARAM_TEXT);
-        } else {
-            $mform->setType('name', PARAM_RAW);
-        }
+        $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        // Introduction text
         $this->add_intro_editor(true, get_string('intro', 'mod_eventsignup'));
 
-        //-------------------------------------------------------------------------------
-        // Availability settings
         $mform->addElement('header', 'availability', get_string('availability'));
 
-        // Open date
-        $mform->addElement('date_time_selector', 'opendate', get_string('opendate', 'mod_eventsignup'));
-        $mform->setDefault('opendate', time());
+        // Tornar as datas opcionais para evitar erros se não forem definidas.
+        $mform->addElement('date_time_selector', 'opendate', get_string('opendate', 'mod_eventsignup'), ['optional' => true]);
+        $mform->addElement('date_time_selector', 'closedate', get_string('closedate', 'mod_eventsignup'), ['optional' => true]);
 
-        // Close date
-        $mform->addElement('date_time_selector', 'closedate', get_string('closedate', 'mod_eventsignup'));
-        $mform->setDefault('closedate', 0);
-
-        //-------------------------------------------------------------------------------
-        // Standard Moodle module settings
         $this->standard_coursemodule_elements();
 
-        //-------------------------------------------------------------------------------
-        // Action buttons
         $this->add_action_buttons();
     }
 }

@@ -9,39 +9,90 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// ... (todas as funções anteriores: eventsignup_add_instance, etc.) ...
+/**
+ * Adiciona uma nova instância de eventsignup.
+ *
+ * @param stdClass $eventsignup O objeto de dados do formulário de criação.
+ * @param mod_eventsignup_mod_form|null $mform O formulário (opcional).
+ * @return int O ID da nova instância.
+ */
+function eventsignup_add_instance(stdClass $eventsignup, mod_eventsignup_mod_form $mform = null) {
+    global $DB;
+    $eventsignup->timemodified = time();
+    $eventsignup->id = $DB->insert_record('eventsignup', $eventsignup);
+    return $eventsignup->id;
+}
+
+/**
+ * Atualiza uma instância existente de eventsignup.
+ *
+ * @param stdClass $eventsignup O objeto de dados do formulário de atualização.
+ * @param mod_eventsignup_mod_form|null $mform O formulário (opcional).
+ * @return bool True em caso de sucesso.
+ */
+function eventsignup_update_instance(stdClass $eventsignup, mod_eventsignup_mod_form $mform = null) {
+    global $DB;
+    $eventsignup->id = $eventsignup->instance;
+    $eventsignup->timemodified = time();
+    return $DB->update_record('eventsignup', $eventsignup);
+}
+
+/**
+ * Exclui uma instância de eventsignup e todos os seus dados associados.
+ *
+ * @param int $id O ID da instância do eventsignup.
+ * @return bool True em caso de sucesso.
+ */
+function eventsignup_delete_instance($id) {
+    global $DB;
+
+    if (!$eventsignup = $DB->get_record('eventsignup', ['id' => $id])) {
+        return false;
+    }
+
+    $transaction = $DB->start_delegated_transaction();
+    
+    // Uma implementação mais robusta excluiria os dados de todas as tabelas de resposta.
+    $DB->delete_records('eventsignup_question', ['survey_id' => $eventsignup->id]);
+    $DB->delete_records('eventsignup_registrants', ['eventsignup_id' => $eventsignup->id]);
+    $DB->delete_records('eventsignup_response', ['eventsignup_id' => $eventsignup->id]);
+    
+    // Finalmente, exclui a própria instância da atividade.
+    $DB->delete_records('eventsignup', ['id' => $eventsignup->id]);
+
+    $transaction->commit();
+
+    return true;
+}
 
 /**
  * Indica se o módulo suporta a inclusão de dados do utilizador nos backups.
- *
- * @return bool True se os dados do utilizador forem suportados, false caso contrário.
+ * @return bool True.
  */
 function eventsignup_backup_is_included() {
     return true;
 }
 
 /**
- * Obtém os contextos onde os ficheiros do módulo são utilizados.
+ * Estende a navegação para a atividade, adicionando links para edição e relatórios.
  *
+ * @param navigation_node $nav O nó de navegação a ser estendido.
  * @param stdClass $course O objeto do curso.
- * @param stdClass $cm O objeto do módulo do curso.
- * @param stdClass $context O contexto do módulo.
- * @return array Um array de contextos.
+ * @param stdClass $module O objeto do módulo.
+ * @param cm_info $cm O objeto de informações do módulo do curso.
  */
-function eventsignup_get_file_areas($course, $cm, $context) {
-    return [
-        'response_attachment' => get_string('response_attachment', 'mod_eventsignup')
-    ];
-}
-
-/**
- * Devolve uma lista de todos os utilizadores para os quais a atividade tem dados.
- * Como lidamos com utilizadores externos, isto é menos relevante, mas bom de ter.
- *
- * @param int $eventsignupid O ID da instância do eventsignup.
- * @return array|false Um array de objetos de utilizador ou false se não houver dados.
- */
-function eventsignup_get_participants($eventsignupid) {
-    // Não aplicável para utilizadores externos. Retorna false.
-    return false;
+function eventsignup_extend_navigation(navigation_node $nav, stdclass $course, stdclass $module, cm_info $cm) {
+    $context = $cm->context;
+    
+    // CORREÇÃO: Adiciona os links diretamente ao nó de navegação da atividade.
+    // O Moodle irá colocá-los no menu de administração (engrenagem) automaticamente.
+    // Esta abordagem é mais simples e robusta.
+    if (has_capability('mod/eventsignup:manage', $context)) {
+        $url = new moodle_url('/mod/eventsignup/edit.php', ['id' => $cm->id]);
+        $nav->add(get_string('editquestions', 'mod_eventsignup'), $url, navigation_node::TYPE_SETTING);
+    }
+    if (has_capability('mod/eventsignup:viewreports', $context)) {
+        $url = new moodle_url('/mod/eventsignup/report.php', ['id' => $cm->id]);
+        $nav->add(get_string('reports', 'mod_eventsignup'), $url, navigation_node::TYPE_SETTING);
+    }
 }

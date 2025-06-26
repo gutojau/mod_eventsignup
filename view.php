@@ -1,20 +1,20 @@
 <?php
 /**
- * This is the main public-facing page for the eventsignup module.
+ * Esta é a página principal virada para o público para o módulo eventsignup.
  *
  * @package   mod_eventsignup
- * @copyright 2024 Your Name
+ * @copyright 2024 Seu Nome
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
 require_once(__DIR__ . '/lib.php');
 require_once(__DIR__ . '/locallib.php');
+// **CORREÇÃO CRÍTICA**: A linha seguinte é necessária para carregar a classe do formulário.
 require_once(__DIR__ . '/classes/form/public_form.php');
 
-$id = required_param('id', PARAM_INT); // The course_module ID.
+$id = required_param('id', PARAM_INT); // O ID do course_module.
 
-// Get the course module, course, and eventsignup instance records.
 if (!$cm = get_coursemodule_from_id('eventsignup', $id)) {
     print_error('invalidcoursemodule');
 }
@@ -25,53 +25,47 @@ if (!$eventsignup = $DB->get_record('eventsignup', ['id' => $cm->instance])) {
     print_error('invalideventsignupid', 'mod_eventsignup');
 }
 
-// NOTE: We are NOT calling require_login() here to allow public access.
-// Permission checks for management/reporting should be done on their respective pages.
-
+// Configuração da PÁGINA na ordem correta
 $PAGE->set_url('/mod/eventsignup/view.php', ['id' => $cm->id]);
-$PAGE->set_title(format_string($eventsignup->name));
-$PAGE->set_heading(format_string($course->fullname));
 $context = context_module::instance($cm->id);
 $PAGE->set_context($context);
+$PAGE->set_cm($cm, $course);
+$PAGE->set_pagelayout('standard');
 
-// Check if the event is open.
+$PAGE->set_title(format_string($eventsignup->name));
+$PAGE->set_heading(format_string($course->fullname));
+
+// Verificar se o evento está aberto.
 $timenow = time();
 if (($eventsignup->opendate != 0 && $timenow < $eventsignup->opendate) || ($eventsignup->closedate != 0 && $timenow > $eventsignup->closedate)) {
     echo $OUTPUT->header();
-    echo $OUTPUT->box(get_string('eventnotavailable', 'mod_eventsignup'), 'notice'); // Add this string to lang file
+    echo $OUTPUT->box(get_string('eventnotavailable', 'mod_eventsignup'));
     echo $OUTPUT->footer();
     exit;
 }
 
-// Instantiate the form.
+// Instanciar o formulário.
 $mform = new \mod_eventsignup\form\public_form(null, ['eventsignup' => $eventsignup, 'cm' => $cm]);
 
 if ($mform->is_cancelled()) {
-    // User clicked cancel, redirect to the course page.
     redirect(new moodle_url('/course/view.php', ['id' => $course->id]));
 } else if ($data = $mform->get_data()) {
-    // Form was submitted and validated.
     try {
         eventsignup_save_submission($eventsignup, $data, $context);
-        
-        // Redirect to a success page.
         $successurl = new moodle_url('/mod/eventsignup/success.php', ['id' => $cm->id]);
         redirect($successurl);
     } catch (Exception $e) {
-        // Handle exceptions from the save process.
         print_error('error_saving_registration', 'mod_eventsignup', '', $e->getMessage());
     }
 }
 
-// Display the page.
+// Exibir a página.
 echo $OUTPUT->header();
 
-// Display introduction.
 if (trim(strip_tags($eventsignup->intro))) {
     echo $OUTPUT->box(format_module_intro('eventsignup', $eventsignup, $cm->id), 'generalbox', 'intro');
 }
 
-// Display the form.
 $mform->display();
 
 echo $OUTPUT->footer();

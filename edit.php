@@ -26,20 +26,17 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/eventsignup:manage', $context);
 
+// Configuração da PÁGINA na ordem correta
 $PAGE->set_url('/mod/eventsignup/edit.php', ['id' => $cm->id]);
-$PAGE->set_title(format_string($eventsignup->name) . ': ' . get_string('editquestions', 'mod_eventsignup'));
-$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_context($context);
 $PAGE->set_pagelayout('standard');
-
-// Navegação
-$PAGE->navbar->add(get_string('editquestions', 'mod_eventsignup'));
+$PAGE->set_title(format_string($eventsignup->name));
+$PAGE->set_heading(get_string('editquestions', 'mod_eventsignup'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('editquestions', 'mod_eventsignup'));
 
-// Conteúdo principal: Lista de perguntas, menu para adicionar nova pergunta, etc.
-
-// Obter todas as perguntas para este evento
+// --- Lógica para exibir a tabela de perguntas existentes ---
 $questions = $DB->get_records('eventsignup_question', ['survey_id' => $eventsignup->id, 'deleted' => 'n'], 'position ASC');
 $totalquestions = count($questions);
 
@@ -63,10 +60,10 @@ if ($questions) {
         $actions = '';
         // Link de Edição
         $actions .= html_writer::link(new moodle_url('/mod/eventsignup/question.php', ['id' => $cm->id, 'qid' => $question->id]), $OUTPUT->pix_icon('t/edit', get_string('edit')));
-
-        // Link de Exclusão
+        
+        // Link de Exclusão com confirmação
         $deleteurl = new moodle_url('/mod/eventsignup/delete.php', ['id' => $cm->id, 'qid' => $question->id, 'sesskey' => sesskey()]);
-        $actions .= ' ' . html_writer::link($deleteurl, $OUTPUT->pix_icon('t/delete', get_string('delete')), ['onclick' => 'return confirm("'.get_string('confirmdeletequestion', 'mod_eventsignup').'")']); // Adicionar string
+        $actions .= ' ' . html_writer::link($deleteurl, $OUTPUT->pix_icon('t/delete', get_string('delete')), ['onclick' => 'return confirm("'.get_string('confirmdeletequestion', 'mod_eventsignup').'")']);
 
         // Links de Mover
         if ($currentpos > 1) {
@@ -93,17 +90,21 @@ if ($questions) {
     echo $OUTPUT->notification(get_string('noquestions', 'mod_eventsignup'));
 }
 
+// --- Lógica para adicionar uma nova pergunta ---
 echo $OUTPUT->box_start();
 echo '<p>' . get_string('addnewquestion', 'mod_eventsignup') . '</p>';
 
-// Menu para adicionar uma nova pergunta de um tipo específico
-$questiontypes = $DB->get_records_menu('eventsignup_question_type', [], '', 'id, type');
-
-$options = [];
-foreach ($questiontypes as $typeid => $typename) {
-    $options[new moodle_url('/mod/eventsignup/question.php', ['id' => $cm->id, 'type' => $typename])] = get_string('questiontype_' . $typename, 'mod_eventsignup');
+// Usar nomes de tipo como chaves e valores para o menu suspenso
+$questiontypes = $DB->get_records_menu('eventsignup_question_type', [], 'type ASC', 'type, type');
+// Traduzir os nomes dos tipos para exibição
+$displaytypes = [];
+foreach ($questiontypes as $key => $value) {
+    $displaytypes[$key] = get_string('questiontype_'.$key, 'mod_eventsignup');
 }
-$select = new single_select(new moodle_url('#'), 'jumpto', $options, null, get_string('add'));
+
+$addquestionurl = new moodle_url('/mod/eventsignup/question.php', ['id' => $cm->id]);
+
+$select = new single_select($addquestionurl, 'type', $displaytypes, null, ['' => get_string('choosedots')]);
 $select->set_label(get_string('questiontype', 'mod_eventsignup'));
 echo $OUTPUT->render($select);
 
